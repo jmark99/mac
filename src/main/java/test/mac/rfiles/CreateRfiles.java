@@ -10,6 +10,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +28,7 @@ public class CreateRfiles {
    * @param numOfFiles - number of rfiles containing the rows
    * @return Mapping of Range -> Files
    */
-  public SortedMap<Range,List<File>> createRfiles(int numOfFiles)
-      throws Exception {
+  public SortedMap<Range,List<File>> createRfiles(int numOfFiles) throws IOException {
     //FileSystem hdfs = FileSystem.get(new URI("hdfs://localhost:8020"), new Configuration());
     SortedMap<Range,List<File>> mapping = new TreeMap<>();
     List<RFileWriter> writers = new ArrayList<>();
