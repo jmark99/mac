@@ -1,5 +1,6 @@
 package test.mac.util;
 
+import jdk.nashorn.internal.ir.RuntimeNode;
 import org.apache.accumulo.core.client.Connector;
 import org.apache.accumulo.minicluster.MiniAccumuloCluster;
 import org.apache.accumulo.minicluster.MiniAccumuloConfig;
@@ -24,6 +25,20 @@ public class MiniUtils {
       throw new RuntimeException("Cluster not initialized and running...");
     }
     return mac;
+  }
+
+  public static MiniAccumuloConfig getConfig() {
+    if (config == null) {
+      throw new RuntimeException("config values not initialized...");
+    }
+    return config;
+  }
+
+  public static Properties getProps() {
+    if (props == null) {
+      throw new RuntimeException("Properties not read in...");
+    }
+    return props;
   }
 
   public static void printClusterInfo(final MiniAccumuloConfig config) {

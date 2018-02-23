@@ -42,7 +42,7 @@ public class MiniTester {
       testCreateOfflineTable();
 
       // Create rfiles for bulk import testing
-      testRFileCreation();
+      //testRFileCreation();
 
     } finally {
       MiniUtils.stopMiniCluster();

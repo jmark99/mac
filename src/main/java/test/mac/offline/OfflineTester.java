@@ -7,6 +7,8 @@ import org.apache.accumulo.core.client.TableExistsException;
 import org.apache.accumulo.minicluster.MiniAccumuloCluster;
 import test.mac.util.MiniUtils;
 
+import java.util.Properties;
+
 public class OfflineTester {
 
   MiniAccumuloCluster mac;
@@ -34,8 +36,8 @@ public class OfflineTester {
     MiniUtils.msg("Start createWithSplits...");
     String tableName = "test1";
 
-    //Connector.builder().usingProperties("")
-    Connector conn = mac.getConnector("root", "secret");
+    Properties props = MiniUtils.getProps();
+    Connector conn = Connector.builder().usingProperties(props).build();
     conn.tableOperations().create(tableName);
     MiniUtils.printTableIdInfo(conn);
     //        SortedSet<Text> splits = new TreeSet<>();
