@@ -44,25 +44,32 @@ public class MiniTester {
     private static Properties props = new Properties();
 
     public static void main(String[] args) throws Exception {
+        
 
         props = readClientProperties(args);
         Path fileSystem = setupPseudoFileSystem(Paths.get(props.getProperty("pseudo.file.system")));
 
         try {
-            config = configureMiniCluster(fileSystem, "splitter", "secret", 3, 2181);
+            config = configureMiniCluster(fileSystem, props.getProperty("instance.name"),
+                props.getProperty("auth.password"), Integer.parseInt(props.getProperty("num"
+                    + ".tservers")), Integer.parseInt(props.getProperty("zk.port")));
             mac = new MiniAccumuloCluster(config);
             mac.start();
-            System.out.println("Started mini cluster...");
+            msg("Started mini cluster...");
             printClusterInfo();
 
             //createWithSplits();
-            createRangeFileMapping(10);
+            //createRangeFileMapping(10);
 
         } finally {
-            System.out.println("Stopping mini cluster...");
+            msg("Stopping mini cluster...");
             mac.stop();
         }
     }
+
+
+
+
 
     private static Properties readClientProperties(String[] args) throws IOException {
         Properties props = new Properties();
@@ -78,17 +85,17 @@ public class MiniTester {
     }
 
     private static void printClusterInfo() {
-        System.out.println("Instance Name:  " + config.getInstanceName());
-        System.out.println("Root Pwd:       " + config.getRootPassword());
-        System.out.println("Default Memory: " + config.getDefaultMemory());
-        System.out.println("ZK Port;        " + config.getZooKeeperPort());
-        System.out.println("Dir:            " + config.getDir());
+        msg("Instance Name:  " + config.getInstanceName());
+        msg("Root Pwd:       " + config.getRootPassword());
+        msg("Default Memory: " + config.getDefaultMemory());
+        msg("ZK Port;        " + config.getZooKeeperPort());
+        msg("Dir:            " + config.getDir());
         Map<String,String> siteConfig = config.getSiteConfig();
-        System.out.println("Site Config: " );
+        msg("Site Config: " );
         siteConfig.forEach((key, value) -> {
-            System.out.println("\t---" + key + " - " + value);
+            msg("\t---" + key + " - " + value);
         });
-        System.out.println("Num TServers:  " + config.getNumTservers());
+        msg("Num TServers:  " + config.getNumTservers());
     }
 
     private static java.nio.file.Path setupPseudoFileSystem(java.nio.file.Path fileSystem)
