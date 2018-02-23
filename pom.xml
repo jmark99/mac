@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.apache.accumulo</groupId>
-    <artifactId>accumulo-tour</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <artifactId>minicluster</artifactId>
+    <version>1.0</version>
     <packaging>jar</packaging>
 
-    <name>accumulo-tour</name>
+    <name>minicluster</name>
     <url></url>
 
     <properties>
@@ -34,7 +34,7 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>1.5.0</version>
         <configuration>
-          <mainClass>tour.Main</mainClass>
+          <mainClass>test.mac.MiniTester</mainClass>
           <cleanupDaemonThreads>false</cleanupDaemonThreads>
         </configuration>
       </plugin>
