@@ -66,7 +66,7 @@ public class MiniTester {
 
     private static Properties readClientProperties(String[] args) throws IOException {
         Properties props = new Properties();
-        String propsFile = "/home/mark/conf/accumulo-client.properties";
+        String propsFile = System.getProperty("user.dir") + "/mac.properties";
         FileInputStream in;
         if (args.length == 1)
             in = new FileInputStream(args[0]);
