@@ -41,7 +41,8 @@ public class MiniTester {
     }
   }
 
-  private void testCreateOfflineTable() {
+  private void testCreateOfflineTable()
+      throws TableExistsException, AccumuloSecurityException, AccumuloException {
     OfflineTableCreator creator = new OfflineTableCreator(MiniUtils.getMac());
     creator.createOfflineTable();
   }
