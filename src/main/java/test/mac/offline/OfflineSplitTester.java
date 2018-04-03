@@ -32,11 +32,11 @@ import java.util.TreeSet;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
-public class OfflineTester {
+public class OfflineSplitTester {
 
   private MiniAccumuloCluster mac;
 
-  public OfflineTester(MiniAccumuloCluster mac) {
+  public OfflineSplitTester(MiniAccumuloCluster mac) {
     this.mac = mac;
   }
 
@@ -57,7 +57,7 @@ public class OfflineTester {
       throws AccumuloSecurityException, AccumuloException, TableExistsException,
       TableNotFoundException {
 
-    MiniUtils.msg("Start createWithSplits...");
+    MiniUtils.msg("Start createTableWithMetadata...");
     String tableName = "test1";
 
     Properties props = MiniUtils.getProps();
@@ -65,6 +65,7 @@ public class OfflineTester {
     MiniUtils.msg("create table " + tableName);
     conn.tableOperations().create(tableName);
     MiniUtils.printTableIdInfo(conn);
+
     MiniUtils.msg("take table offline...");
     conn.tableOperations().offline(tableName);
     MiniUtils.msg("get table Id, i.e., name...");
@@ -84,22 +85,26 @@ public class OfflineTester {
     MiniUtils.msg("write split data to metadata table...");
     writeSplitsToMetadataTable(conn, tableName, tableId, metadata, splits);
 
-//    metadata.clear();
-//    MiniUtils.msg("reread metadata table...");
-//    start = System.currentTimeMillis();
-//    metadata = readMetadataFromTableId(conn, tableId);
-//    end = System.currentTimeMillis();
-//    printMetaData(metadata);
+    MiniUtils.pause("finished writing splits to table...");
 
-    //MiniUtils.msg("bring table online...");
-    //conn.tableOperations().online(tableName);
-    MiniUtils.pause();
+    metadata.clear();
+    MiniUtils.pause("reread metadata table to see if changes are there...");
+    start = System.currentTimeMillis();
+    metadata = readMetadataFromTableId(conn, tableId);
+    end = System.currentTimeMillis();
+    MiniUtils.pause("finished re-reading metadata table...");
+    printMetaData(metadata);
+
+    MiniUtils.pause("bring table back online...");
+    conn.tableOperations().online(tableName);
+    MiniUtils.pause("Completed method");
   }
 
   private void writeSplitsToMetadataTable(Connector conn, String tableName, String
       tableId, Map<Key,Value> metadata, SortedSet<Text> splits) throws TableNotFoundException,
       MutationsRejectedException {
 
+    MiniUtils.msg("Start writeSplitsToMetadataTable...");
     // get batch writer to metadata table
     BatchWriter writer = conn.createBatchWriter("accumulo.metadata", new BatchWriterConfig());
 
@@ -169,11 +174,18 @@ public class OfflineTester {
 
       colf = new Text("~tab".getBytes(CHARSET));
       colq = new Text("~pr".getBytes(CHARSET));
+
+      String rowval = "\00" + lastRow;
+      byte[] bytes;
       if (first) {
-        val = new Value(prevrow.getBytes(CHARSET));
+        rowval = "\01" + prevrow;
+        bytes = rowval.getBytes();
+        val = new Value(bytes);
         first = false;
       } else {
-        val = new Value(prev.getBytes(CHARSET));
+        rowval = "\01" + prev;
+        bytes = rowval.getBytes();
+        val = new Value(bytes);
       }
       //mutation.put(colf, colq, val);
       writer.addMutation(mutation);
@@ -207,15 +219,21 @@ public class OfflineTester {
 
     colf = new Text("~tab".getBytes(CHARSET));
     colq = new Text("~pr".getBytes(CHARSET));
-    val = new Value(lastRow.getBytes(CHARSET));
+    String rowval = "\00" + lastRow;
+    byte[] bytes = rowval.getBytes();
+    val = new Value(bytes);
     mutation.put(colf, colq, val);
     writer.addMutation(mutation);
     MiniUtils.msg(rowId + " " +  colf.toString() + ":" + colq.toString() + " - " + val.toString());
+
+    MiniUtils.pause("ending pause");
+    //if (true) return;
 
     writer.close();
   }
 
   private void printMetaData(Map<Key, Value> metadata) {
+    MiniUtils.msg("Start printMetaData...");
     for (Map.Entry<Key, Value> entry : metadata.entrySet()) {
       MiniUtils.msg("rowID:    " + entry.getKey().getRow().toString());
       MiniUtils.msg("Fam:      " + entry.getKey().getColumnFamily().toString());
@@ -227,6 +245,8 @@ public class OfflineTester {
 
   private Map<Key, Value> readMetadataFromTableId(final Connector conn, final String tableId) {
     Map<Key, Value> tableDataMap = new HashMap<>();
+
+    MiniUtils.msg("Start readMetadataFromTableId...");
     try (Scanner scan = conn.createScanner("accumulo.metadata", Authorizations.EMPTY)) {
       Text row = new Text(tableId + "<");
       scan.setRange(new Range(row));
@@ -241,6 +261,8 @@ public class OfflineTester {
   }
 
   private String getTableId(final Connector conn, final String tableName) {
+
+    MiniUtils.msg("Start getTableId...");
     Map<String,String> tableIdMap = conn.tableOperations().tableIdMap();
     for (Map.Entry<String, String> entry : tableIdMap.entrySet()) {
       if (entry.getKey().equals(tableName)) {
@@ -251,6 +273,7 @@ public class OfflineTester {
   }
 
   private void parseMetaDataRow(final Key key, final Value value) {
+    MiniUtils.msg("Start parseMetaDataRow...");
     Text row = key.getRow();
     String family = key.getColumnFamily().toString();
     String qualifier = key.getColumnQualifier().toString();

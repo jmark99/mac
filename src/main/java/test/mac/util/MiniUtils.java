@@ -116,6 +116,12 @@ public class MiniUtils {
     System.console().readLine("press enter to continue..\n");
   }
 
+  public static void pause(final String msg) {
+    System.console().printf("\n=========================\n");
+    System.out.println(msg);
+    System.console().readLine("press enter to continue..\n");
+  }
+
   public static void printTableIdInfo(Connector conn) {
     Map<String,String> idMap = conn.tableOperations().tableIdMap();
     idMap.forEach((k, v) -> {

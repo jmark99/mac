@@ -7,7 +7,8 @@ import org.apache.accumulo.core.client.AccumuloSecurityException;
 import org.apache.accumulo.core.client.TableExistsException;
 import org.apache.accumulo.core.client.TableNotFoundException;
 
-import test.mac.offline.OfflineTester;
+import test.mac.offline.OfflineSplitTester;
+import test.mac.offline.OfflineTableCreator;
 import test.mac.rfiles.CreateRfiles;
 import test.mac.util.MiniUtils;
 
@@ -27,6 +28,9 @@ public class MiniTester {
       // List testing classes below here
 
       // Work on creating splits offline at table startup
+      testAddSplits();
+
+      // work on just creating an offline table
       testCreateOfflineTable();
 
       // Create rfiles for bulk import testing
@@ -37,15 +41,20 @@ public class MiniTester {
     }
   }
 
+  private void testCreateOfflineTable() {
+    OfflineTableCreator creator = new OfflineTableCreator(MiniUtils.getMac());
+    creator.createOfflineTable();
+  }
+
   private void testRFileCreation() throws IOException {
     CreateRfiles creator = new CreateRfiles();
     creator.createRfiles(10);
   }
 
-  private void testCreateOfflineTable()
+  private void testAddSplits()
       throws TableExistsException, AccumuloSecurityException, AccumuloException,
       TableNotFoundException {
-    OfflineTester tester = new OfflineTester(MiniUtils.getMac());
+    OfflineSplitTester tester = new OfflineSplitTester(MiniUtils.getMac());
     tester.createTableWithMetadata();
 
   }
