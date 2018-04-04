@@ -31,22 +31,25 @@ public class OfflineTableCreator {
     MiniUtils.msg("create table " + tableName);
     conn.tableOperations().create(tableName, ntc);
     MiniUtils.printTableIdInfo(conn);
-
     MiniUtils.pause("should have created ontab");
 
     tableName = "offtab";
     ntc = new NewTableConfiguration();
     ntc.createOffline();
-    Map<String, String> tprops = new HashMap<>();
-    tprops.put("table.create.offline", "true");
-    ntc.setProperties(tprops);
     MiniUtils.msg("create table " + tableName);
     conn.tableOperations().create(tableName, ntc);
     MiniUtils.printTableIdInfo(conn);
+    MiniUtils.pause("should have created offtab in offline mode");
 
-    MiniUtils.pause("should have created offtab");
+    tableName = "offtabsplit";
+    ntc = new NewTableConfiguration();
+    ntc.createOffline();
+    MiniUtils.msg("create table " + tableName);
+    conn.tableOperations().create(tableName, ntc);
+    MiniUtils.printTableIdInfo(conn);
+    MiniUtils.pause("should have created offtabsplit with some splits");
 
-    MiniUtils.pause("exiting createOfflineTable");
+    MiniUtils.pause("exiting..");
 
   }
 }
