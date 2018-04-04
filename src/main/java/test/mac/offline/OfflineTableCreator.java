@@ -36,6 +36,7 @@ public class OfflineTableCreator {
 
     tableName = "offtab";
     ntc = new NewTableConfiguration();
+    ntc.createOffline();
     Map<String, String> tprops = new HashMap<>();
     tprops.put("table.create.offline", "true");
     ntc.setProperties(tprops);
