@@ -28,7 +28,7 @@ public class MiniTester {
       // List testing classes below here
 
       // Work on creating splits offline at table startup
-      testAddSplits();
+      //testAddSplits();
 
       // work on just creating an offline table
       testCreateOfflineTable();
