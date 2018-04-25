@@ -2,8 +2,15 @@ package test.mac.util;
 
 import jdk.nashorn.internal.ir.RuntimeNode;
 import org.apache.accumulo.core.client.Connector;
+import org.apache.accumulo.core.client.Scanner;
+import org.apache.accumulo.core.client.TableNotFoundException;
+import org.apache.accumulo.core.data.Key;
+import org.apache.accumulo.core.data.Range;
+import org.apache.accumulo.core.data.Value;
+import org.apache.accumulo.core.security.Authorizations;
 import org.apache.accumulo.minicluster.MiniAccumuloCluster;
 import org.apache.accumulo.minicluster.MiniAccumuloConfig;
+import org.apache.hadoop.io.Text;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -46,7 +54,7 @@ public class MiniUtils {
     msg("Root Pwd:       " + config.getRootPassword());
     msg("Default Memory: " + config.getDefaultMemory());
     msg("ZK Port;        " + config.getZooKeeperPort());
-    msg("Dir:            " + config.getDir());
+    msg("FS Dir:         " + config.getDir());
     Map<String,String> siteConfig = config.getSiteConfig();
     msg("Num TServers:  " + config.getNumTservers());
     if (siteConfig.size() > 0) {
@@ -128,6 +136,59 @@ public class MiniUtils {
       //System.out.format("\t %20s : %s", k, v);
       System.out.println("\t" + k + " - " + v);
     });
+  }
+
+  public static Map<Key,Value> readMetadataFromTableId(final Connector conn, final String tableId) {
+    Map<Key, Value> tableDataMap = new HashMap<>();
+
+    MiniUtils.msg("Start readMetadataFromTableId...");
+    try (Scanner scan = conn.createScanner("accumulo.metadata", Authorizations.EMPTY)) {
+      Text row = new Text(tableId + "<");
+      scan.setRange(new Range(row));
+      for (Map.Entry<Key,Value> entry : scan) {
+        tableDataMap.put(entry.getKey(), entry.getValue());
+      }
+    } catch (TableNotFoundException e) {
+      MiniUtils.msg("Failed to read table");
+      e.printStackTrace();
+    }
+    return tableDataMap;
+  }
+
+  public static String getFutureAndLocationCount(final Connector conn, final String tableId) {
+    int fcnt  = 0;
+    int lcnt  = 0;
+    try (Scanner scan = conn.createScanner("accumulo.metadata", Authorizations.EMPTY)) {
+      Text row = new Text(tableId + "<");
+      scan.setRange(new Range(row));
+      for (Map.Entry<Key,Value> entry : scan) {
+        String colf = entry.getKey().getColumnFamily().toString();
+        if (colf.contains("future")) {
+          fcnt++;
+        } else if (colf.contains("loc")) {
+          lcnt++;
+        }
+      }
+    } catch (TableNotFoundException e) {
+      MiniUtils.msg("Failed to read table");
+      e.printStackTrace();
+    }
+    return String.valueOf(fcnt) + ":" + String.valueOf(lcnt);
+  }
+
+  public static void sleep(final int millis) {
+    try {Thread.sleep(millis); } catch (InterruptedException e) {;}
+  }
+
+  public static void printMetaData(Map<Key, Value> metadata) {
+    MiniUtils.msg("Start printMetaData...");
+    for (Map.Entry<Key, Value> entry : metadata.entrySet()) {
+      MiniUtils.msg("rowID:    " + entry.getKey().getRow().toString());
+      MiniUtils.msg("Fam:      " + entry.getKey().getColumnFamily().toString());
+      MiniUtils.msg("Qual:     " + entry.getKey().getColumnQualifier().toString());
+      MiniUtils.msg("Vis:      " + entry.getKey().getColumnVisibility().toString());
+      MiniUtils.msg("Value:    " + entry.getValue().toString());
+    }
   }
 
   public static boolean recursiveDelete(File directoryToBeDeleted) {
