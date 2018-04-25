@@ -83,7 +83,7 @@ public class MiniUtils {
     msg("Stopped minicluster...");
   }
 
-  private static Properties readClientProperties() throws IOException {
+  public static Properties readClientProperties() throws IOException {
     Properties props = new Properties();
     FileInputStream in;
     in = new FileInputStream(System.getProperty("user.dir") + "/mac.properties");

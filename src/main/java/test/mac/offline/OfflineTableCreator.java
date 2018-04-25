@@ -64,13 +64,13 @@ public class OfflineTableCreator {
   }
 
 
-  private void createTable(Connector conn, final String tableName, NewTableConfiguration ntc)
+  public void createTable(Connector conn, final String tableName, NewTableConfiguration ntc)
       throws AccumuloSecurityException, AccumuloException, TableExistsException {
     createTable(conn, tableName, ntc, false);
   }
 
 
-  private void createTable(Connector conn, final String tableName, NewTableConfiguration ntc,
+  public void createTable(Connector conn, final String tableName, NewTableConfiguration ntc,
       boolean timeit)
       throws AccumuloSecurityException, AccumuloException, TableExistsException {
     MiniUtils.msg("create table " + tableName);
