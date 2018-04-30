@@ -20,28 +20,22 @@ public class MiniTester {
 
   public static void main(String[] args) throws Exception {
     MiniTester tester = new MiniTester();
-    //tester.unoRunner();
-    tester.execute();
+    if (args.length > 0) {
+      if (args[0].equals("cluster-only")) {
+        tester.runClusterOnly();
+      } else {
+        tester.execute();
+      }
+    }
   }
 
-  private void unoRunner()
-      throws IOException, TableExistsException, AccumuloSecurityException, AccumuloException {
-    Connector conn = null;
-    conn = Connector.builder().
-          usingProperties("/home/mark/dev/uno/install/accumulo-2.0.0-SNAPSHOT/conf/accumulo"
-              + "-client.properties").build();
-
-    Properties props = MiniUtils.readClientProperties();
-    String splitfile = props.getProperty("split.file");
-    MiniUtils.msg("Splitfile : " + splitfile);
-
-    OfflineTableCreator otc = new OfflineTableCreator(null);
-    //otc.createTable(conn, "test22", new NewTableConfiguration());
-    //otc.createTable(conn, "offlineTable", new NewTableConfiguration().createOffline());
-    otc.createTable(conn, "splitTableOffline", new NewTableConfiguration().createOffline()
-        .withPartitions(splitfile));
-    otc.createTable(conn, "splitTableOnline", new NewTableConfiguration().
-        withPartitions(splitfile), true);
+  private void runClusterOnly() throws IOException, InterruptedException {
+    try {
+      MiniUtils.startMiniCluster();
+      MiniUtils.pause();
+    } finally {
+      MiniUtils.stopMiniCluster();
+    }
   }
 
   private void execute()
@@ -49,18 +43,7 @@ public class MiniTester {
       TableExistsException, AccumuloException {
     try {
       MiniUtils.startMiniCluster();
-
-      // List testing classes below here
-
-      // Work on creating splits offline at table startup
-      //testAddSplits();
-
-      // work on just creating an offline table
       testCreateOfflineTable();
-
-      // Create rfiles for bulk import testing
-      //testRFileCreation();
-
     } finally {
       MiniUtils.stopMiniCluster();
     }
