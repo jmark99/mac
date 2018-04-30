@@ -40,24 +40,38 @@ public class OfflineTableCreator {
 
     createTable(conn, "onlineTable", new NewTableConfiguration());
 
+//    MiniUtils.printTableIdInfo(conn);
+//    MiniUtils.pause("Created onlineTable");
+
     createTable(conn, "offlineTable", new NewTableConfiguration().createOffline());
+
+//    MiniUtils.printTableIdInfo(conn);
+//    MiniUtils.pause("Created offlineTable");
 
     createTable(conn, "splitTableOffline", new NewTableConfiguration().createOffline()
         .withPartitions(splitfile));
 
-    try {
-      MiniUtils.msg("call online for table...");
-      Stopwatch timer = Stopwatch.createUnstarted();
-      timer.start();
-      conn.tableOperations().online("splitTableOffline", true);
-      timer.stop();
-      MiniUtils.msg("splitTableOffline took " + timer + " to come online");
-    } catch (TableNotFoundException e) {
-      e.printStackTrace();
-    }
+//    MiniUtils.printTableIdInfo(conn);
+//    MiniUtils.pause("Created splitTableOffline");
+//
+//    try {
+//      MiniUtils.msg("call online for table...");
+//      Stopwatch timer = Stopwatch.createUnstarted();
+//      timer.start();
+//      conn.tableOperations().online("splitTableOffline", true);
+//      timer.stop();
+//      MiniUtils.msg("splitTableOffline took " + timer + " to come online");
+//    } catch (TableNotFoundException e) {
+//      e.printStackTrace();
+//    }
+//
+//    MiniUtils.pause("table now online..");
 
     createTable(conn, "splitTableOnline", new NewTableConfiguration().
         withPartitions(splitfile), true);
+
+    MiniUtils.printTableIdInfo(conn);
+    MiniUtils.pause("Created splitTableOnline");
 
     MiniUtils.pause("exiting..");
 
@@ -103,12 +117,13 @@ public class OfflineTableCreator {
           break;
         }
         i++;
-        MiniUtils.sleep(5000);
+        if  (fcnt > 15000)
+          MiniUtils.sleep(60000);
+        else
+          MiniUtils.sleep(10000);
       }
     }
     timer.stop();
     MiniUtils.msg("Creation of " + tableName + " took " + timer);
-    MiniUtils.printTableIdInfo(conn);
-    MiniUtils.pause("Created " + tableName);
   }
 }
