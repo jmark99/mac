@@ -16,8 +16,16 @@ import com.google.common.base.Stopwatch;
 import org.apache.hadoop.io.Text;
 import test.mac.util.MiniUtils;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import java.util.Map;
 import java.util.Properties;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.stream.Stream;
 
 public class OfflineTableCreator {
 
@@ -45,11 +53,28 @@ public class OfflineTableCreator {
 
     createTable(conn, "offlineTable", new NewTableConfiguration().createOffline());
 
-//    MiniUtils.printTableIdInfo(conn);
-//    MiniUtils.pause("Created offlineTable");
+    MiniUtils.printTableIdInfo(conn);
+    MiniUtils.pause("Created offlineTable");
+
+
+    // Read a file of splits and place them into a collection that will be passed to
+    // newTableCreation
+    SortedSet<Text> splits = new TreeSet<>();
+    // Read splits from slit file into splits
+    // Then withSplits will write the collecxtion into a
+    // file on HDFS and use that file to parse through the split points.
+
+    try (Stream<String> lines = Files.lines(Paths.get(splitfile), StandardCharsets.UTF_8)) {
+      lines.forEachOrdered(split -> {
+        splits.add(new Text(split));
+      });
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
 
     createTable(conn, "splitTableOffline", new NewTableConfiguration().createOffline()
-        .withPartitions(splitfile));
+        .withSplits(splits));
 
 //    MiniUtils.printTableIdInfo(conn);
 //    MiniUtils.pause("Created splitTableOffline");
@@ -66,9 +91,9 @@ public class OfflineTableCreator {
 //    }
 //
 //    MiniUtils.pause("table now online..");
-
+//
     createTable(conn, "splitTableOnline", new NewTableConfiguration().
-        withPartitions(splitfile), true);
+        withSplits(splits), true);
 
     MiniUtils.printTableIdInfo(conn);
     MiniUtils.pause("Created splitTableOnline");

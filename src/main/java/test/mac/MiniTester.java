@@ -22,10 +22,12 @@ public class MiniTester {
     MiniTester tester = new MiniTester();
     if (args.length > 0) {
       if (args[0].equals("cluster-only")) {
+        MiniUtils.msg("Run cluster-only");
         tester.runClusterOnly();
-      } else {
-        tester.execute();
       }
+    } else {
+        MiniUtils.msg("Create tables with splits.");
+        tester.execute();
     }
   }
 
@@ -39,32 +41,19 @@ public class MiniTester {
   }
 
   private void execute()
-      throws IOException, InterruptedException, TableNotFoundException, AccumuloSecurityException,
+      throws IOException, InterruptedException, AccumuloSecurityException,
       TableExistsException, AccumuloException {
     try {
       MiniUtils.startMiniCluster();
-      testCreateOfflineTable();
+      testCreateOfflineTables();
     } finally {
       MiniUtils.stopMiniCluster();
     }
   }
 
-  private void testCreateOfflineTable()
+  private void testCreateOfflineTables()
       throws TableExistsException, AccumuloSecurityException, AccumuloException {
     OfflineTableCreator creator = new OfflineTableCreator(MiniUtils.getMac());
     creator.createOfflineTable();
-  }
-
-  private void testRFileCreation() throws IOException {
-    CreateRfiles creator = new CreateRfiles();
-    creator.createRfiles(10);
-  }
-
-  private void testAddSplits()
-      throws TableExistsException, AccumuloSecurityException, AccumuloException,
-      TableNotFoundException {
-    OfflineSplitTester tester = new OfflineSplitTester(MiniUtils.getMac());
-    tester.createTableWithMetadata();
-
   }
 }
