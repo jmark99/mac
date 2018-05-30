@@ -47,23 +47,20 @@ public class OfflineTableCreator {
     MiniUtils.msg("Splitfile : " + splitfile);
 
     createTable(conn, "onlineTable", new NewTableConfiguration());
-
-//    MiniUtils.printTableIdInfo(conn);
-//    MiniUtils.pause("Created onlineTable");
+    MiniUtils.printTableIdInfo(conn);
+    MiniUtils.pause("Created onlineTable");
 
     createTable(conn, "offlineTable", new NewTableConfiguration().createOffline());
-
     MiniUtils.printTableIdInfo(conn);
     MiniUtils.pause("Created offlineTable");
 
 
     // Read a file of splits and place them into a collection that will be passed to
     // newTableCreation
-    SortedSet<Text> splits = new TreeSet<>();
     // Read splits from slit file into splits
     // Then withSplits will write the collecxtion into a
     // file on HDFS and use that file to parse through the split points.
-
+    SortedSet<Text> splits = new TreeSet<>();
     try (Stream<String> lines = Files.lines(Paths.get(splitfile), StandardCharsets.UTF_8)) {
       lines.forEachOrdered(split -> {
         splits.add(new Text(split));
@@ -72,13 +69,11 @@ public class OfflineTableCreator {
       e.printStackTrace();
     }
 
-
     createTable(conn, "splitTableOffline", new NewTableConfiguration().createOffline()
         .withSplits(splits));
+    MiniUtils.printTableIdInfo(conn);
+    MiniUtils.pause("Created splitTableOffline");
 
-//    MiniUtils.printTableIdInfo(conn);
-//    MiniUtils.pause("Created splitTableOffline");
-//
 //    try {
 //      MiniUtils.msg("call online for table...");
 //      Stopwatch timer = Stopwatch.createUnstarted();
@@ -89,25 +84,20 @@ public class OfflineTableCreator {
 //    } catch (TableNotFoundException e) {
 //      e.printStackTrace();
 //    }
-//
 //    MiniUtils.pause("table now online..");
-//
+
     createTable(conn, "splitTableOnline", new NewTableConfiguration().
         withSplits(splits), true);
-
     MiniUtils.printTableIdInfo(conn);
     MiniUtils.pause("Created splitTableOnline");
 
     MiniUtils.pause("exiting..");
-
   }
-
 
   public void createTable(Connector conn, final String tableName, NewTableConfiguration ntc)
       throws AccumuloSecurityException, AccumuloException, TableExistsException {
     createTable(conn, tableName, ntc, false);
   }
-
 
   public void createTable(Connector conn, final String tableName, NewTableConfiguration ntc,
       boolean timeit)
