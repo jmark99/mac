@@ -119,6 +119,12 @@ public class MiniUtils {
     System.out.println(">>> " + msg);
   }
 
+  public static void msg(String msg, boolean pause) {
+    System.out.println(">>> " + msg);
+    if (pause)
+      System.console().readLine("press enter to continue..\n");
+  }
+
   public static void pause() {
     System.console().printf("\n=========================\n");
     System.console().readLine("press enter to continue..\n");
