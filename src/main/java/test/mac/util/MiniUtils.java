@@ -4,12 +4,14 @@ import jdk.nashorn.internal.ir.RuntimeNode;
 import org.apache.accumulo.core.client.Connector;
 import org.apache.accumulo.core.client.Scanner;
 import org.apache.accumulo.core.client.TableNotFoundException;
+import org.apache.accumulo.core.conf.Property;
 import org.apache.accumulo.core.data.Key;
 import org.apache.accumulo.core.data.Range;
 import org.apache.accumulo.core.data.Value;
 import org.apache.accumulo.core.security.Authorizations;
 import org.apache.accumulo.minicluster.MiniAccumuloCluster;
 import org.apache.accumulo.minicluster.MiniAccumuloConfig;
+import org.apache.accumulo.miniclusterImpl.MiniAccumuloConfigImpl;
 import org.apache.hadoop.io.Text;
 
 import java.io.File;
@@ -49,7 +51,7 @@ public class MiniUtils {
     return props;
   }
 
-  public static void printClusterInfo(final MiniAccumuloConfig config) {
+  public static void printClusterInfo() {
     msg("Instance Name:  " + config.getInstanceName());
     msg("Root Pwd:       " + config.getRootPassword());
     msg("Default Memory: " + config.getDefaultMemory());
@@ -65,20 +67,39 @@ public class MiniUtils {
     }
   }
 
-  public static void startMiniCluster() throws IOException, InterruptedException {
+
+  public static  void setupMiniCluster() throws Exception {
     props = readClientProperties();
+    //props.forEach((k, v) -> MiniUtils.msg(k + " - " + v));
     Path fileSystem = setupPseudoFileSystem(Paths.get(props.getProperty("pseudo.file.system")));
     config = configureMiniCluster(fileSystem, props.getProperty("instance.name"),
         props.getProperty("auth.password"),
         Integer.parseInt(props.getProperty("num" + ".tservers")),
         Integer.parseInt(props.getProperty("zk.port")));
     mac = new MiniAccumuloCluster(config);
-    mac.start();
-    MiniUtils.msg("Started mini cluster...");
-    MiniUtils.printClusterInfo(config);
   }
 
-  public static void stopMiniCluster() throws IOException, InterruptedException {
+  public static void startMiniCluster() throws IOException,
+      InterruptedException {
+    mac.start();
+    MiniUtils.msg("Started mini cluster...");
+    MiniUtils.printClusterInfo();
+    MiniUtils.pause();
+//    props = readClientProperties();
+//    props.forEach((k, v) -> MiniUtils.msg(k + " - " + v));
+//    Path fileSystem = setupPseudoFileSystem(Paths.get(props.getProperty("pseudo.file.system")));
+//    config = configureMiniCluster(fileSystem, props.getProperty("instance.name"),
+//        props.getProperty("auth.password"),
+//        Integer.parseInt(props.getProperty("num" + ".tservers")),
+//        Integer.parseInt(props.getProperty("zk.port")));
+//    mac = new MiniAccumuloCluster(config);
+//    mac.start();
+//    MiniUtils.msg("Started mini cluster...");
+//    MiniUtils.printClusterInfo(config);
+  }
+
+  public static void stopMiniCluster() throws IOException,
+      InterruptedException {
     mac.stop();
     msg("Stopped minicluster...");
   }
@@ -113,6 +134,9 @@ public class MiniUtils {
     config.setInstanceName(instance);
     config.setNumTservers(numTServers);
     config.setZooKeeperPort(zkPort);
+    HashMap<String, String> site = new HashMap<>();
+    site.put(Property.TSERV_WORKQ_THREADS.getKey(), "2");
+    config.setSiteConfig(site);
     return config;
   }
   public static void msg(String msg) {
